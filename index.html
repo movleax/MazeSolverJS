@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>MazeSolverJS</title>
+    <style>
+    	* { padding: 0; margin: 0; }
+    	canvas { background: #eee; display: block; margin: 0 auto; }
+    </style>
+</head>
+<body>
+
+<canvas id="myCanvas" width="800" height="600"></canvas>
+
+<input type="file" id="fileinput" />
+<script>
+	var canvas = document.getElementById("myCanvas");
+	var ctx = canvas.getContext("2d");
+
+function readSingleFile(evt) {
+    //Retrieve the first (and only!) File from the FileList object
+    var f = evt.target.files[0]; 
+
+    if (f) {
+      var r = new FileReader();
+      r.onload = function(e) { 
+	      var contents = e.target.result;
+        alert( "Got the file.n" 
+              +"name: " + f.name + "n"
+              +"type: " + f.type + "n"
+              +"size: " + f.size + " bytesn"
+              + "starts with: " + contents.substr(1, contents.indexOf("n"))		
+        );  
+		console.log(r.result);
+      }
+      r.readAsText(f);
+	  
+    } else { 
+      alert("Failed to load file");
+    }
+  }
+  
+document.getElementById('fileinput').addEventListener('change', readSingleFile, false);
+	
+	class foo
+	{
+		
+	}
+	
+</script>
+
+</body>
+</html>
