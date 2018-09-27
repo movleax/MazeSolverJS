@@ -165,8 +165,8 @@ class CollidableObject
 
     CheckCollision(otherCollisionBox)
     {
-        if( (this.cBox.position.x >= otherCollisionBox.position.x && this.cBox.position.x <= otherCollisionBox.position.x + otherCollisionBox.w) 
-        && (this.cBox.position.y >= otherCollisionBox.position.y && this.cBox.position.y <= otherCollisionBox.position.y + otherCollisionBox.h) )
+        if( this.cBox.position.x + this.cBox.w >= otherCollisionBox.position.x && this.cBox.position.x <= otherCollisionBox.position.x + otherCollisionBox.w
+         && this.cBox.position.y + this.cBox.y >= otherCollisionBox.position.y && this.cBox.position.y <= otherCollisionBox.position.y + otherCollisionBox.h)
         {
             this.cBox.hasCollided = true;
             return true;
@@ -261,30 +261,35 @@ class Character extends MovableBlock
         this.cBoxNorth = new CollisionBox(x, y-h, w, h);
         this.cBoxSouth = new CollisionBox(x, y+h, w, h);
         this.cBoxArr = [this.cBox, this.cBoxEast, this.cBoxWest, this.cBoxNorth, this.cBoxSouth];
-
+        
         this.Direction = Object.freeze({
-            East:   w,
-            West:  -w,
-            North: -h,
-            South: h
+            East:   {directionMagnitude: w},
+            West:  {directionMagnitude: -w},
+            North: {directionMagnitude: -h},
+            South: {directionMagnitude: h}
         });
 
         this.currentDirection = this.Direction.East;
-        this.velocity.UpdateVector(this.Direction.East, 0);
+        this.velocity.UpdateVector(this.Direction.East.directionMagnitude, 0);
     }
 
     // Override
     UpdateCollisionBoxPosition()
     {
+        super.UpdateCollisionBoxPosition();
+        
         for(var i=0; i < this.cBoxArr.length; i++)
         {
             switch(this.cBoxArr[i])
             {
-                case this.cBoxEast: this.cBoxArr[i].UpdateCollisionBox(this.rect.position.x + this.rect.w, this.rect.position.y); break;
-                case this.cBoxWest: this.cBoxArr[i].UpdateCollisionBox(this.rect.position.x - this.rect.w, this.rect.position.y); break;
-                case this.cBoxNorth: this.cBoxArr[i].UpdateCollisionBox(this.rect.position.x, this.rect.position.y - this.rect.h); break;
-                case this.cBoxSouth: this.cBoxArr[i].UpdateCollisionBox(this.rect.position.x, this.rect.position.y + this.rect.h); break;
+                case this.cBoxEast: this.cBoxArr[i].UpdateCollisionBox(this.rect.position.x + this.rect.w, this.rect.position.y, this.cBoxArr[i].w, this.cBoxArr[i].h); break;
+                case this.cBoxWest: this.cBoxArr[i].UpdateCollisionBox(this.rect.position.x - this.rect.w, this.rect.position.y, this.cBoxArr[i].w, this.cBoxArr[i].h); break;
+                case this.cBoxNorth: this.cBoxArr[i].UpdateCollisionBox(this.rect.position.x, this.rect.position.y - this.rect.h, this.cBoxArr[i].w, this.cBoxArr[i].h); break;
+                case this.cBoxSouth: this.cBoxArr[i].UpdateCollisionBox(this.rect.position.x, this.rect.position.y + this.rect.h, this.cBoxArr[i].w, this.cBoxArr[i].h); break;
             }
+
+            // set the hasCollided to false
+            this.cBoxArr[i].hasCollided = false;
         }
     }
             
@@ -302,14 +307,11 @@ class Character extends MovableBlock
         var retVal = false
         for(var i=0; i < this.cBoxArr.length; i++)
         {
-            if( (this.cBoxArr[i].position.x >= otherCollisionBox.position.x && this.cBoxArr[i].position.x <= otherCollisionBox.position.x + otherCollisionBox.w) && (this.cBoxArr[i].position.y >= otherCollisionBox.position.y && this.cBoxArr[i].position.y <= otherCollisionBox.position.y + otherCollisionBox.h) )
+            if( this.cBoxArr[i].position.x + this.cBoxArr[i].w > otherCollisionBox.position.x && this.cBoxArr[i].position.x < otherCollisionBox.position.x + otherCollisionBox.w 
+             && this.cBoxArr[i].position.y + this.cBoxArr[i].h > otherCollisionBox.position.y && this.cBoxArr[i].position.y < otherCollisionBox.position.y + otherCollisionBox.h )
             {
                 this.cBoxArr[i].hasCollided = true;
                 retVal = true;
-            }
-            else
-            {
-                this.cBoxArr[i].hasCollided = false;
             }
         }
         
@@ -351,10 +353,10 @@ class Character extends MovableBlock
         // Also change our velocity vector
         switch(this.currentDirection)
         {
-            case this.Direction.East: this.velocity.UpdateVector(this.Direction.East, 0); break;
-            case this.Direction.West: this.velocity.UpdateVector(this.Direction.West, 0); break;
-            case this.Direction.North: this.velocity.UpdateVector(0, this.Direction.North); break;
-            case this.Direction.South: this.velocity.UpdateVector(0, this.Direction.South); break;
+            case this.Direction.East: this.velocity.UpdateVector(this.Direction.East.directionMagnitude, 0); break;
+            case this.Direction.West: this.velocity.UpdateVector(this.Direction.West.directionMagnitude, 0); break;
+            case this.Direction.North: this.velocity.UpdateVector(0, this.Direction.North.directionMagnitude); break;
+            case this.Direction.South: this.velocity.UpdateVector(0, this.Direction.South.directionMagnitude); break;
         }
         
     }
@@ -420,10 +422,21 @@ function GameLogic()
                 if(blocks[A] instanceof Character)
                 {
                     //console.log("made in collision")
-                    blocks[A].DecideDirection();
-                    break;
+                    //blocks[A].DecideDirection();
+                    //break;
                 }
             }
+        }
+    }
+
+    // perform logically decisions
+    for(var it in blocks)
+    {
+        if(blocks[it] instanceof Character)
+        {
+            //console.log("made in collision")
+            blocks[it].DecideDirection();
+            //break;
         }
     }
 }
