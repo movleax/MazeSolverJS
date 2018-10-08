@@ -250,6 +250,28 @@ class MovableBlock extends Block
     }
 }
 
+class Direction 
+{
+    constructor(east, west, north, south)
+    {
+        // copy constructor hack
+        if (east instanceof Direction)
+        {
+            this.East = east.East;
+            this.West = east.West;
+            this.North = east.North;
+            this.South = east.South;
+        }
+        else
+        {
+            this.East = {directionMagnitude: east};
+            this.West = {directionMagnitude: west};
+            this.North = {directionMagnitude: north};
+            this.South = {directionMagnitude: south};
+        }
+    }
+}
+
 class Character extends MovableBlock
 {
     constructor(x, y, w, h, ctx)
@@ -262,12 +284,7 @@ class Character extends MovableBlock
         this.cBoxSouth = new CollisionBox(x, y+h, w, h);
         this.cBoxArr = [this.cBox, this.cBoxEast, this.cBoxWest, this.cBoxNorth, this.cBoxSouth];
         
-        this.Direction = Object.freeze({
-            East:   {directionMagnitude: w},
-            West:  {directionMagnitude: -w},
-            North: {directionMagnitude: -h},
-            South: {directionMagnitude: h}
-        });
+        this.Direction = new Direction(w, -w, -h, h);
 
         this.currentDirection = this.Direction.East;
         this.velocity.UpdateVector(this.Direction.East.directionMagnitude, 0);
@@ -360,6 +377,48 @@ class Character extends MovableBlock
         }
         
     }
+
+
+}
+
+class Strategy
+{
+    constructor()
+    {
+
+    }
+
+    Execute()
+    {
+        throw "Must implement Execute() before using it!";
+    }
+}
+
+class Random extends Strategy
+{
+    constructor(direction)
+    {
+        super();
+        this.Direction = direction;
+        this.currentDirection
+        this.ListOfAvailableDirections = [];
+    }
+
+    Execute()
+    {
+
+    }
+
+}
+
+class DFS extends Strategy
+{
+    constructor()
+    {
+
+    }
+
+    
 }
 
 class End extends Block
