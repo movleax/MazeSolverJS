@@ -272,6 +272,29 @@ class Direction
     }
 }
 
+class Node
+{
+    constructor(nodeValue)
+    {
+        this.neighborNodes = [];
+        this.nodeValue = nodeValue;
+    }
+
+    AddNeighborNode(n)
+    {
+        this.neighborNodes.push(n);
+    }
+
+}
+
+class PathNodes
+{
+    constructor()
+    {
+        this.nodes = new Node();
+    }
+}
+
 class Character extends MovableBlock
 {
     constructor(x, y, w, h, ctx)
@@ -285,6 +308,9 @@ class Character extends MovableBlock
         this.cBoxArr = [this.cBox, this.cBoxEast, this.cBoxWest, this.cBoxNorth, this.cBoxSouth];
         
         this.Direction = new Direction(w, -w, -h, h);
+
+        this.strategy;
+        this.pathNodes = new PathNodes();
 
         this.currentDirection = this.Direction.East;
         this.velocity.UpdateVector(this.Direction.East.directionMagnitude, 0);
@@ -357,24 +383,7 @@ class Character extends MovableBlock
             }
         }
 
-        // see if our list of available directions contians our current direction. If it is, then return; we will continue following our first direction
-        if(ListOfAvailableDirections.indexOf(this.currentDirection) >= 0)
-        {
-            console.log("skip change direction")
-            return;
-        }
-
-        // If we have hit a wall going our current direction, decide a new route based on the options available
-        this.currentDirection = ListOfAvailableDirections[Math.floor(Math.random()*ListOfAvailableDirections.length)];
         
-        // Also change our velocity vector
-        switch(this.currentDirection)
-        {
-            case this.Direction.East: this.velocity.UpdateVector(this.Direction.East.directionMagnitude, 0); break;
-            case this.Direction.West: this.velocity.UpdateVector(this.Direction.West.directionMagnitude, 0); break;
-            case this.Direction.North: this.velocity.UpdateVector(0, this.Direction.North.directionMagnitude); break;
-            case this.Direction.South: this.velocity.UpdateVector(0, this.Direction.South.directionMagnitude); break;
-        }
         
     }
 
@@ -404,21 +413,33 @@ class Random extends Strategy
         this.ListOfAvailableDirections = [];
     }
 
+    UpdateStrategy()
+    {
+
+    }
+
     Execute()
     {
+        // see if our list of available directions contians our current direction. If it is, then return; we will continue following our first direction
+        if(ListOfAvailableDirections.indexOf(this.currentDirection) >= 0)
+        {
+            console.log("skip change direction")
+            return;
+        }
 
+        // If we have hit a wall going our current direction, decide a new route based on the options available
+        this.currentDirection = ListOfAvailableDirections[Math.floor(Math.random()*ListOfAvailableDirections.length)];
+        
+        // Also change our velocity vector
+        switch(this.currentDirection)
+        {
+            case this.Direction.East: this.velocity.UpdateVector(this.Direction.East.directionMagnitude, 0); break;
+            case this.Direction.West: this.velocity.UpdateVector(this.Direction.West.directionMagnitude, 0); break;
+            case this.Direction.North: this.velocity.UpdateVector(0, this.Direction.North.directionMagnitude); break;
+            case this.Direction.South: this.velocity.UpdateVector(0, this.Direction.South.directionMagnitude); break;
+        }
     }
 
-}
-
-class DFS extends Strategy
-{
-    constructor()
-    {
-
-    }
-
-    
 }
 
 class End extends Block
