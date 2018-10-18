@@ -292,6 +292,12 @@ class PathNodes
     constructor()
     {
         this.nodes = new Node();
+        this.head = this.nodes;
+    }
+
+    AddNeighborNode(n)
+    {
+        this.nodes.AddNeighborNode(n);
     }
 }
 
@@ -308,12 +314,15 @@ class Character extends MovableBlock
         this.cBoxArr = [this.cBox, this.cBoxEast, this.cBoxWest, this.cBoxNorth, this.cBoxSouth];
         
         this.Direction = new Direction(w, -w, -h, h);
+        this.ListOfAvailableDirections = [];
 
-        this.strategy;
+        this.strategy = new Random();
         this.pathNodes = new PathNodes();
 
         this.currentDirection = this.Direction.East;
         this.velocity.UpdateVector(this.Direction.East.directionMagnitude, 0);
+
+        this.characterProxy = new CharacterProxy(this);
     }
 
     // Override
@@ -363,7 +372,7 @@ class Character extends MovableBlock
 
     DecideDirection()
     {
-        var ListOfAvailableDirections = [];
+        this.ListOfAvailableDirections = [];
 
         //console.log("In character DecideDirection")
 
@@ -376,17 +385,62 @@ class Character extends MovableBlock
             }
             switch(this.cBoxArr[i])
             {
-                case this.cBoxEast: ListOfAvailableDirections.push(this.Direction.East); break;
-                case this.cBoxWest: ListOfAvailableDirections.push(this.Direction.West); break;
-                case this.cBoxNorth: ListOfAvailableDirections.push(this.Direction.North); break;
-                case this.cBoxSouth: ListOfAvailableDirections.push(this.Direction.South); break;
+                case this.cBoxEast: this.ListOfAvailableDirections.push(this.Direction.East); break;
+                case this.cBoxWest: this.ListOfAvailableDirections.push(this.Direction.West); break;
+                case this.cBoxNorth: this.ListOfAvailableDirections.push(this.Direction.North); break;
+                case this.cBoxSouth: this.ListOfAvailableDirections.push(this.Direction.South); break;
             }
         }
 
-        
-        
+        this.currentDirection = this.strategy.Execute(this.characterProxy);
+
+        // Also change our velocity vector
+        switch(this.currentDirection)
+        {
+            case this.Direction.East: this.velocity.UpdateVector(this.Direction.East.directionMagnitude, 0); break;
+            case this.Direction.West: this.velocity.UpdateVector(this.Direction.West.directionMagnitude, 0); break;
+            case this.Direction.North: this.velocity.UpdateVector(0, this.Direction.North.directionMagnitude); break;
+            case this.Direction.South: this.velocity.UpdateVector(0, this.Direction.South.directionMagnitude); break;
+        }
     }
 
+    GetListOfAvailableDirections()
+    {
+        return this.ListOfAvailableDirections;
+    }
+
+    GetCurrentDirection()
+    {
+        return this.currentDirection;
+    }
+
+    GetDirectionValues()
+    {
+        return this.Direction;
+    }
+}
+
+class CharacterProxy
+{
+    constructor(character)
+    {
+        this.character = character;
+    }
+
+    GetListOfAvailableDirections()
+    {
+        return this.character.GetListOfAvailableDirections();
+    }
+
+    GetCurrentDirection()
+    {
+        return this.character.GetCurrentDirection();
+    }
+
+    GetDirectionValues()
+    {
+        return this.character.GetDirectionValues();
+    }
 
 }
 
@@ -397,7 +451,7 @@ class Strategy
 
     }
 
-    Execute()
+    Execute(characterProxy)
     {
         throw "Must implement Execute() before using it!";
     }
@@ -405,39 +459,28 @@ class Strategy
 
 class Random extends Strategy
 {
-    constructor(direction)
+    constructor()
     {
         super();
-        this.Direction = direction;
-        this.currentDirection
-        this.ListOfAvailableDirections = [];
-    }
-
-    UpdateStrategy()
-    {
 
     }
 
-    Execute()
+    Execute(characterProxy)
     {
+        let currentDirection = characterProxy.GetCurrentDirection();
+        let ListOfAvailableDirections = characterProxy.GetListOfAvailableDirections();
+
         // see if our list of available directions contians our current direction. If it is, then return; we will continue following our first direction
-        if(ListOfAvailableDirections.indexOf(this.currentDirection) >= 0)
+        if(ListOfAvailableDirections.indexOf(currentDirection) >= 0)
         {
             console.log("skip change direction")
-            return;
+            return currentDirection;
         }
 
         // If we have hit a wall going our current direction, decide a new route based on the options available
-        this.currentDirection = ListOfAvailableDirections[Math.floor(Math.random()*ListOfAvailableDirections.length)];
-        
-        // Also change our velocity vector
-        switch(this.currentDirection)
-        {
-            case this.Direction.East: this.velocity.UpdateVector(this.Direction.East.directionMagnitude, 0); break;
-            case this.Direction.West: this.velocity.UpdateVector(this.Direction.West.directionMagnitude, 0); break;
-            case this.Direction.North: this.velocity.UpdateVector(0, this.Direction.North.directionMagnitude); break;
-            case this.Direction.South: this.velocity.UpdateVector(0, this.Direction.South.directionMagnitude); break;
-        }
+        currentDirection = ListOfAvailableDirections[Math.floor(Math.random()*ListOfAvailableDirections.length)];
+
+        return currentDirection;
     }
 
 }
