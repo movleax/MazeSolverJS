@@ -1,25 +1,81 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8" />
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1">
     <title>MazeSolverJS</title>
     <style>
     	* { padding: 0; margin: 0; }
-    	canvas { background: #eee; display: block; margin: 0 auto; }
+    	canvas 
+		{ 
+			background: #eee; 
+			display: block; 
+			margin: 0 auto; 
+		}
+
+		.container-canvas 
+		{
+			margin-right: auto;
+			margin-left: auto;
+			margin-top: 100px;
+			width: 512px;
+		}
+
+		.container-input 
+		{
+			margin-right: auto;
+			margin-left: auto;
+			margin-top: 10px;
+			width: 512px;
+		}
 		
 		body
 		{
-			background-color: #4a506b;
+			background-color: #4a506b !important;
 		}
-    </style>
+	</style>
+	
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 </head>
 <body>
 
-<canvas id="myCanvas" width="512" height="512"></canvas>
+	<div class="container">
+		
+		<div class="container-canvas">
+			<canvas id="myCanvas" width="512" height="512"></canvas>
+		</div>
 
-<input type="file" id="fileinput" />
+		<div class="container-input">
+			<div class="row">
+				<div class="col-sm-4">
+					<label class="btn btn-default btn-file">
+						Choose File<input class="btn" type="file" id="fileinput" style="display: none;">
+					</label>
+				</div>
+				<div class="col-sm-4">
+					<div class="dropup">
+						<button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+							Maze Solve Algorithms
+							<span class="caret"></span>
+						</button>
+						<ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+							<li value=1><a href="#">Random</a></li>
+							<li value=2><a href="#">Right-most path</a></li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
 
-<script src="main.js"></script>
-
+	<script>
+		$(".dropdown-menu li").on("click", function (e){
+			let foo = $(this);
+			console.log(foo.val());
+		});
+	</script>
+	<script src="main.js"></script>
 </body>
 </html>

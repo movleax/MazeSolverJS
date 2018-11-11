@@ -48,6 +48,14 @@ function checkLoad()
     }
 }
 
+function ReloadGame()
+{
+    blocks = [];
+    ParseMap();
+    endGame.ResetEndGame();
+    gameLoopInterval = setInterval(GameCycle, 125);
+}
+
 function ParseMap()
 {
     var x=0;
@@ -684,6 +692,62 @@ class End extends Block
     }
 }
 
+class EndGame
+{
+    constructor(ctx)
+    {
+        if(!EndGame.instance)
+        {
+            this.x = ctx.canvas.width/4;
+            this.y = ctx.canvas.height/2;
+            this.endGameTriggered = false;
+
+            EndGame.instance = this;
+        }
+
+        return EndGame.instance;
+    }
+
+    Draw()
+    {
+        if(this.endGameTriggered)
+        {
+            ctx.beginPath();
+            ctx.rect(this.x-this.x/2 + 15, this.y-this.y/5, this.x*3, this.y/2);
+            ctx.fillStyle = "black";
+            ctx.globalAlpha = 0.85;
+            ctx.fill();
+            ctx.globalAlpha = 1.0;
+            ctx.closePath();
+
+            ctx.font = "30px Arial";
+            ctx.fillStyle = '#5b9aa0';
+            ctx.fillText("Made it to the end!", this.x, this.y);
+            ctx.fillText("Click anywhere to restart...", this.x-this.x/4, this.y+35);
+        }
+    }
+
+    CallReloadGame()
+    {
+        ReloadGame();
+    }
+    
+    TriggerEndGame()
+    {
+        clearInterval(gameLoopInterval);
+        this.endGameTriggered = true;
+
+        canvas.addEventListener("click", this.CallReloadGame);
+    }
+
+    ResetEndGame()
+    {
+        this.endGameTriggered = false;
+        canvas.removeEventListener("click", this.CallReloadGame)
+    }
+}
+let endGame = new EndGame(ctx);
+
 
 function Draw() 
 {
@@ -699,6 +763,8 @@ function Draw()
     {
         blocks[it].Draw();
     }
+
+    endGame.Draw();
 }
 
 function GameLogic()
@@ -715,11 +781,9 @@ function GameLogic()
 
             if(blocks[A].CheckCollision(blocks[B].GetCollisionBox()))
             {
-                if(blocks[A] instanceof Character)
+                if(blocks[A] instanceof Character && blocks[B] instanceof End)
                 {
-                    //console.log("made in collision")
-                    //blocks[A].DecideDirection();
-                    //break;
+                    endGame.TriggerEndGame();
                 }
             }
         }
@@ -753,4 +817,4 @@ function GameCycle()
     Draw();
 }
 
-setInterval(GameCycle, 125);
+let gameLoopInterval = setInterval(GameCycle, 125);
