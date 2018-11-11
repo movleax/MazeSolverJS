@@ -316,7 +316,7 @@ class Character extends MovableBlock
         this.Direction = new Direction(w, -w, -h, h);
         this.ListOfAvailableDirections = [];
 
-        this.strategy = new Random();
+        this.strategy = new ChooseRightPath();// Random();
         this.pathNodes = new PathNodes();
 
         this.currentDirection = this.Direction.East;
@@ -418,6 +418,11 @@ class Character extends MovableBlock
     {
         return this.Direction;
     }
+
+    GetPosition()
+    {
+        return this.cBox.GetPosition(); // return vector2D
+    }
 }
 
 class CharacterProxy
@@ -442,6 +447,10 @@ class CharacterProxy
         return this.character.GetDirectionValues();
     }
 
+    GetPosition()
+    {
+        return this.character.GetPosition(); // return vector2D
+    }
 }
 
 class Strategy
@@ -455,6 +464,179 @@ class Strategy
     {
         throw "Must implement Execute() before using it!";
     }
+}
+
+class ChooseRightPath extends Strategy
+{
+    constructor()
+    {
+        super();
+        this.currentNode;
+        this.previousNode;
+        this.NodeValue = 1;
+    }
+
+    Execute(characterProxy)
+    {
+        let currentDirection = characterProxy.GetCurrentDirection();
+        let ListOfAvailableDirections = characterProxy.GetListOfAvailableDirections();
+        let directionValues = characterProxy.GetDirectionValues();
+        let x = characterProxy.GetPosition().x;
+        let y = characterProxy.GetPosition().y;
+        let xOffset = x;
+        let yOffset = y;
+
+        if(this.currentNode == null)
+        {
+            this.currentNode = new Node({x:x, y:y, value:this.NodeValue});
+            this.NodeValue++;
+        }
+        else
+        {
+            //this.previousNode = this.currentNode;
+            //this.currentNode  = new Node({x:x, y:y, value:this.NodeValue});
+            //this.NodeValue++;
+            //this.currentNode.neighborNodes.push(this.previousNode);
+        }
+
+        // find the backwards direction
+        let backwardsDirection;
+        switch(currentDirection)
+        {
+            case directionValues.East: backwardsDirection = directionValues.West; break;
+            case directionValues.West: backwardsDirection = directionValues.East; break;
+            case directionValues.North: backwardsDirection = directionValues.South; break;
+            case directionValues.South: backwardsDirection = directionValues.North; break;
+        }
+
+        let newDirection = currentDirection;
+        switch(currentDirection)
+        {
+                case directionValues.East: newDirection = directionValues.South; yOffset += newDirection.directionMagnitude; break;
+                case directionValues.West: newDirection = directionValues.North; yOffset += newDirection.directionMagnitude; break;
+                case directionValues.North: newDirection = directionValues.East; xOffset += newDirection.directionMagnitude; break;
+                case directionValues.South: newDirection = directionValues.West; xOffset += newDirection.directionMagnitude; break;
+        }
+
+        for(let i=0; i < 4 && (ListOfAvailableDirections.indexOf(newDirection) < 0 || newDirection == backwardsDirection); i++)
+        {
+            xOffset = x;
+            yOffset = y;
+
+            if(i == 3)
+            {
+                newDirection = backwardsDirection;
+                switch(backwardsDirection)
+                {
+                    case directionValues.East: xOffset += newDirection.directionMagnitude; break;
+                    case directionValues.West: xOffset += newDirection.directionMagnitude; break;
+                    case directionValues.North: yOffset += newDirection.directionMagnitude; break;
+                    case directionValues.South: yOffset += newDirection.directionMagnitude; break;
+                }
+            }
+            else
+            {
+                switch(newDirection)
+                {
+                    case directionValues.East: newDirection = directionValues.South; yOffset += newDirection.directionMagnitude; break;
+                    case directionValues.West: newDirection = directionValues.North; yOffset += newDirection.directionMagnitude; break;
+                    case directionValues.North: newDirection = directionValues.East; xOffset += newDirection.directionMagnitude; break;
+                    case directionValues.South: newDirection = directionValues.West; xOffset += newDirection.directionMagnitude; break;
+                }
+            }
+        }
+
+        // make neighbor nodes if they don't exist
+        if(this.currentNode.neighborNodes.length <= 0)
+        {
+            for(let i=0; i < ListOfAvailableDirections.length; i++)
+            {
+                if(ListOfAvailableDirections[i] == backwardsDirection && this.previousNode != null)
+                {
+                    this.currentNode.neighborNodes.push(this.previousNode);
+                    continue;
+                }
+
+                if(newDirection == backwardsDirection)
+                {
+                    continue;
+                }
+
+                if(ListOfAvailableDirections[i] == newDirection)
+                {
+                    this.currentNode.neighborNodes.push(new Node({x:xOffset, y:yOffset, value:this.NodeValue}));
+                    this.NodeValue++;
+                    continue;
+                }
+
+                switch(ListOfAvailableDirections[i])
+                {
+                    case directionValues.East: this.currentNode.neighborNodes.push(new Node({x:x+directionValues.East.directionMagnitude, y:y, value:-1})); break;
+                    case directionValues.West: this.currentNode.neighborNodes.push(new Node({x:x-directionValues.West.directionMagnitude, y:y, value:-1})); break;
+                    case directionValues.North: this.currentNode.neighborNodes.push(new Node({x:x, y:y-directionValues.North.directionMagnitude, value:-1})); break;
+                    case directionValues.South: this.currentNode.neighborNodes.push(new Node({x:x, y:y+directionValues.North.directionMagnitude, value:-1})); break;
+                }
+            }  
+        }
+
+        let chosenNode = this.currentNode;
+        for(let i =0; i < this.currentNode.neighborNodes.length; i++)
+        {
+            let n = this.currentNode.neighborNodes[i];
+            if(n.nodeValue.x == xOffset && n.nodeValue.y == yOffset)
+            {
+                chosenNode = n;
+                break;
+            }
+        }
+        
+        for(let i=0; i < this.currentNode.neighborNodes.length && chosenNode.nodeValue.value < this.currentNode.nodeValue.value-1; i++)
+        {  
+            let n = this.currentNode.neighborNodes[i];
+            if(n.nodeValue.value < chosenNode.nodeValue.value)
+            {
+                chosenNode = n;
+
+                // figure out the new direction if the node changed
+                if(chosenNode.nodeValue.x > x)
+                {
+                    newDirection = directionValues.East;
+                }
+                else if(chosenNode.nodeValue.x < x)
+                {
+                    newDirection = directionValues.West;
+                }
+                // figure out the new direction if the node changed
+                if(chosenNode.nodeValue.y > y)
+                {
+                    newDirection = directionValues.North;
+                }
+                else if(chosenNode.nodeValue.y < y)
+                {
+                    newDirection = directionValues.South;
+                }
+            }
+        }
+
+        // if we changed the node, make sure the previous node is one we don't want to visit again
+        if(chosenNode.nodeValue.x != xOffset || chosenNode.nodeValue.y != yOffset)
+        {
+            this.currentNode.nodeValue.value = this.currentNode.nodeValue.value*1000;
+        }
+
+        this.previousNode = this.currentNode;
+        this.currentNode = chosenNode;
+        this.currentNode.nodeValue.value = this.NodeValue;
+        this.NodeValue++;
+
+        return newDirection;
+    }
+
+    ChooseNextRight(currentDirection, directionValues)
+    {
+        
+    }
+
 }
 
 class Random extends Strategy
@@ -521,15 +703,6 @@ function Draw()
 
 function GameLogic()
 {
-    // Update positions
-    for(var it in blocks)
-    {
-        if(blocks[it] instanceof MovableBlock)
-        {
-            blocks[it].Move();
-        }
-    }
-
     // check collisions
     for(var A in blocks)
     {
@@ -560,6 +733,15 @@ function GameLogic()
             //console.log("made in collision")
             blocks[it].DecideDirection();
             //break;
+        }
+    }
+
+    // Update positions
+    for(var it in blocks)
+    {
+        if(blocks[it] instanceof MovableBlock)
+        {
+            blocks[it].Move();
         }
     }
 }
