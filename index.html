@@ -42,8 +42,11 @@
 <body>
 
 	<div class="container">
-		
+
 		<div class="container-canvas">
+			<div>
+				<h2><div class="label label-default">Algorithm: <span></span></span></div></h2>
+			</div>
 			<canvas id="myCanvas" width="512" height="512"></canvas>
 		</div>
 
@@ -60,9 +63,9 @@
 							Maze Solve Algorithms
 							<span class="caret"></span>
 						</button>
+						
 						<ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-							<li value=1><a href="#">Random</a></li>
-							<li value=2><a href="#">Right-most path</a></li>
+							
 						</ul>
 					</div>
 				</div>
@@ -70,12 +73,14 @@
 		</div>
 	</div>
 
+	<script src="main.js"></script>
 	<script>
-		$(".dropdown-menu li").on("click", function (e){
-			let foo = $(this);
-			console.log(foo.val());
+		$(document).ready(()=>{
+			$(".dropdown-menu li").on("click", function (e){
+				let dropDownChoice = $(this);
+				ChangeMazeAlgorithm(dropDownChoice.text());
+			});
 		});
 	</script>
-	<script src="main.js"></script>
 </body>
 </html>

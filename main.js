@@ -5,6 +5,8 @@ var map;
 var BlockWidth = 16;
 var BlockHeight = 16;
 var blocks = [];
+var gameLoopInterval;
+var mazeSolverAlgorithms = [];
 
 function readSingleFile(evt) 
 {
@@ -82,6 +84,7 @@ function ParseMap()
         {
             // x+(BlockWidth/4), y+(BlockWidth/4), BlockWidth-(BlockWidth/2), BlockHeight-(BlockWidth/2)
             blocks.push(new Character(x, y, BlockWidth, BlockHeight, ctx));
+            ChangeMazeAlgorithm($(".label span").text());
         }
         if(map[i] == "E")
         {
@@ -331,6 +334,16 @@ class Character extends MovableBlock
         this.velocity.UpdateVector(this.Direction.East.directionMagnitude, 0);
 
         this.characterProxy = new CharacterProxy(this);
+    }
+
+    ChangeStrategy(newStrategy)
+    {
+        if(!(newStrategy instanceof Strategy))
+        {
+            return;
+        }
+
+        this.strategy = newStrategy;
     }
 
     // Override
@@ -663,7 +676,6 @@ class Random extends Strategy
         // see if our list of available directions contians our current direction. If it is, then return; we will continue following our first direction
         if(ListOfAvailableDirections.indexOf(currentDirection) >= 0)
         {
-            console.log("skip change direction")
             return currentDirection;
         }
 
@@ -817,4 +829,52 @@ function GameCycle()
     Draw();
 }
 
-let gameLoopInterval = setInterval(GameCycle, 125);
+function ChangeMazeAlgorithm(name)
+{
+    let character;
+    for(let i=0; i < blocks.length; i++)
+    {
+        if(blocks[i] instanceof Character)
+        {
+            character = blocks[i];
+            break;
+        }
+    }
+
+    $(".label span").text(name);
+
+    if(character == null)
+    {
+        return;
+    }
+
+    switch(name)
+    {
+    case "Random": character.ChangeStrategy(new Random()); break;
+    case "Right-most Path": character.ChangeStrategy(new ChooseRightPath()); break;
+    }
+}
+
+function SetupMazeAlgorithms()
+{
+    let dropDown = $(".dropdown-menu");
+
+    mazeSolverAlgorithms.push("Random");
+    mazeSolverAlgorithms.push("Right-most Path");
+
+    for(let i=0; i < mazeSolverAlgorithms.length; i++)
+    {
+        let a = $("<a>");
+        a.attr("href", "#");
+        a.text(mazeSolverAlgorithms[i]);
+
+        let li = $("<li>").append(a);
+        dropDown.append(li);
+    }
+
+    $(".label span").text("Random");
+}
+
+SetupMazeAlgorithms();
+
+gameLoopInterval = setInterval(GameCycle, 125);
