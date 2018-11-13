@@ -33,6 +33,74 @@
 		{
 			background-color: #4a506b !important;
 		}
+
+		.slidecontainer {
+    width: 100%; /* Width of the outside container */
+}
+
+/* The slider itself */
+.slider {
+    -webkit-appearance: none;  /* Override default CSS styles */
+    appearance: none;
+    width: 100%; /* Full-width */
+    height: 25px; /* Specified height */
+    background: #d3d3d3; /* Grey background */
+    outline: none; /* Remove outline */
+    opacity: 0.7; /* Set transparency (for mouse-over effects on hover) */
+    -webkit-transition: .2s; /* 0.2 seconds transition on hover */
+    transition: opacity .2s;
+}
+/* Mouse-over effects */
+.slider:hover {
+    opacity: 1; /* Fully shown on mouse-over */
+}
+
+/* The slider handle (use -webkit- (Chrome, Opera, Safari, Edge) and -moz- (Firefox) to override default look) */ 
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none; /* Override default look */
+    appearance: none;
+    width: 25px; /* Set a specific slider handle width */
+    height: 25px; /* Slider handle height */
+    background: #4CAF50; /* Green background */
+    cursor: pointer; /* Cursor on hover */
+}
+
+.slider::-moz-range-thumb {
+    width: 25px; /* Set a specific slider handle width */
+    height: 25px; /* Slider handle height */
+    background: #4CAF50; /* Green background */
+    cursor: pointer; /* Cursor on hover */
+}
+
+.sidenav {
+    width: 130px;
+    position: fixed;
+    z-index: 1;
+    top: 20px;
+    margin-left: auto;
+    
+    
+    padding: 8px 0;
+
+	margin-right: auto;
+			margin-left: auto;
+			margin-top: 250px;
+			width: auto;
+}
+
+.sidenav .container-input .row {
+    padding: 6px 8px 6px 16px;
+    text-decoration: none;
+    font-size: 25px;
+    color: #2196F3;
+    display: block;
+}
+
+.sidenav a:hover {
+    color: #064579;
+}
+
+
 	</style>
 	
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
@@ -43,34 +111,62 @@
 
 	<div class="container">
 
-		<div class="container-canvas">
-			<div>
-				<h2><div class="label label-default">Algorithm: <span></span></span></div></h2>
-			</div>
-			<canvas id="myCanvas" width="512" height="512"></canvas>
-		</div>
-
-		<div class="container-input">
-			<div class="row">
-				<div class="col-sm-4">
-					<label class="btn btn-default btn-file">
-						Choose File<input class="btn" type="file" id="fileinput" style="display: none;">
-					</label>
+		<div class="sidenav">
+			<div class="container-input">
+				<div class="row">
+					<div class="col-sm-4">
+						<label class="btn btn-default btn-file">
+							Choose File<input class="btn" type="file" id="fileinput" style="display: none;">
+						</label>
+					</div>
 				</div>
-				<div class="col-sm-4">
-					<div class="dropup">
-						<button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-							Maze Solve Algorithms
-							<span class="caret"></span>
-						</button>
-						
-						<ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+
+				<div class="row">
+					<div class="col-sm-4">
+						<div>
+							<div class="label label-default">Algorithm: <span id="algorithm-span"></span></div>
+						</div>
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-sm-4">
+						<div class="dropup">
+							<button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+								Maze Solve Algorithms
+								<span class="caret"></span>
+							</button>
 							
-						</ul>
+							<ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+								
+							</ul>
+						</div>
+					</div>
+				</div>
+				
+				<div class="row">
+					<div class="col-sm-4">
+						<div class="label label-default">
+							Speed: <span class="badge badge-light" id="speed-badge"></span>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-sm-4">
+						<div class="slidecontainer">
+							<input type="range" min="1" max="100" value="50" class="slider" id="speed">
+						</div>
 					</div>
 				</div>
 			</div>
 		</div>
+
+		<div class="main">
+			<div class="container-canvas">
+				<canvas id="myCanvas" width="512" height="512"></canvas>
+			</div>
+		</div>
+
 	</div>
 
 	<script src="main.js"></script>
@@ -79,6 +175,23 @@
 			$(".dropdown-menu li").on("click", function (e){
 				let dropDownChoice = $(this);
 				ChangeMazeAlgorithm(dropDownChoice.text());
+			});
+
+			let isSliderDragging = false;
+			$("#speed").on({
+				mousedown: function(){
+					isSliderDragging = true;
+				}, 
+				mousemove: function(){
+					if(isSliderDragging)
+					{
+						let slider = $(this);
+						ChangeSimulationSpeed(slider.val());
+					}
+				}, 
+				mouseup: function(){
+					isSliderDragging = false;
+				}
 			});
 		});
 	</script>

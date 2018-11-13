@@ -7,6 +7,7 @@ var BlockHeight = 16;
 var blocks = [];
 var gameLoopInterval;
 var mazeSolverAlgorithms = [];
+var simSpeed = 125;
 
 function readSingleFile(evt) 
 {
@@ -55,7 +56,7 @@ function ReloadGame()
     blocks = [];
     ParseMap();
     endGame.ResetEndGame();
-    gameLoopInterval = setInterval(GameCycle, 125);
+    gameLoopInterval = setInterval(GameCycle, simSpeed);
 }
 
 function ParseMap()
@@ -84,7 +85,7 @@ function ParseMap()
         {
             // x+(BlockWidth/4), y+(BlockWidth/4), BlockWidth-(BlockWidth/2), BlockHeight-(BlockWidth/2)
             blocks.push(new Character(x, y, BlockWidth, BlockHeight, ctx));
-            ChangeMazeAlgorithm($(".label span").text());
+            ChangeMazeAlgorithm($("#algorithm-span").text());
         }
         if(map[i] == "E")
         {
@@ -512,13 +513,6 @@ class ChooseRightPath extends Strategy
             this.currentNode = new Node({x:x, y:y, value:this.NodeValue});
             this.NodeValue++;
         }
-        else
-        {
-            //this.previousNode = this.currentNode;
-            //this.currentNode  = new Node({x:x, y:y, value:this.NodeValue});
-            //this.NodeValue++;
-            //this.currentNode.neighborNodes.push(this.previousNode);
-        }
 
         // find the backwards direction
         let backwardsDirection;
@@ -672,13 +666,30 @@ class Random extends Strategy
     {
         let currentDirection = characterProxy.GetCurrentDirection();
         let ListOfAvailableDirections = characterProxy.GetListOfAvailableDirections();
+        let directionValues = characterProxy.GetDirectionValues();
 
         // see if our list of available directions contians our current direction. If it is, then return; we will continue following our first direction
-        if(ListOfAvailableDirections.indexOf(currentDirection) >= 0)
+        if(ListOfAvailableDirections.length <= 2 && ListOfAvailableDirections.indexOf(currentDirection) >= 0)
         {
             return currentDirection;
         }
 
+        // find the backwards direction
+        let backwardsDirection;
+        switch(currentDirection)
+        {
+            case directionValues.East: backwardsDirection = directionValues.West; break;
+            case directionValues.West: backwardsDirection = directionValues.East; break;
+            case directionValues.North: backwardsDirection = directionValues.South; break;
+            case directionValues.South: backwardsDirection = directionValues.North; break;
+        }
+
+        if(ListOfAvailableDirections.length >= 2 && Math.random() > 0.1)
+        {
+            let backwardsDirectionIndex = ListOfAvailableDirections.indexOf(backwardsDirection);
+            ListOfAvailableDirections.splice(backwardsDirectionIndex, 1);
+        }
+        
         // If we have hit a wall going our current direction, decide a new route based on the options available
         currentDirection = ListOfAvailableDirections[Math.floor(Math.random()*ListOfAvailableDirections.length)];
 
@@ -758,8 +769,7 @@ class EndGame
         canvas.removeEventListener("click", this.CallReloadGame)
     }
 }
-let endGame = new EndGame(ctx);
-
+var endGame = new EndGame(ctx);
 
 function Draw() 
 {
@@ -841,7 +851,7 @@ function ChangeMazeAlgorithm(name)
         }
     }
 
-    $(".label span").text(name);
+    $("#algorithm-span").text(name);
 
     if(character == null)
     {
@@ -872,9 +882,22 @@ function SetupMazeAlgorithms()
         dropDown.append(li);
     }
 
-    $(".label span").text("Random");
+    $("#algorithm-span").text("Random");
+}
+
+function ChangeSimulationSpeed(value)
+{
+    simSpeed = 1001 - Math.floor(Math.log(value)*21.3 + 1)*10;
+
+    if(!endGame.endGameTriggered)
+    {
+        clearInterval(gameLoopInterval);
+        gameLoopInterval = setInterval(GameCycle, simSpeed);
+    }
+
+    $("#speed-badge").text(value);
 }
 
 SetupMazeAlgorithms();
 
-gameLoopInterval = setInterval(GameCycle, 125);
+ChangeSimulationSpeed(50);
