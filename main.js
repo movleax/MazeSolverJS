@@ -916,3 +916,29 @@ function ChangeSimulationSpeed(value)
 SetupMazeAlgorithms();
 
 ChangeSimulationSpeed(50);
+
+$(document).ready(()=>{
+    $(".dropdown-menu li").on("click", function (e){
+        let dropDownChoice = $(this);
+        ChangeMazeAlgorithm(dropDownChoice.text());
+    });
+
+    let isSliderDragging = false;
+    $("#speed").on({
+        mousedown: function(){
+            isSliderDragging = true;
+        }, 
+        mousemove: function(){
+            if(isSliderDragging)
+            {
+                let slider = $(this);
+                ChangeSimulationSpeed(slider.val());
+            }
+        }, 
+        mouseup: function(){
+            isSliderDragging = false;
+        }
+    });
+
+    LoadGame();
+});
