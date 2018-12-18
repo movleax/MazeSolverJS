@@ -913,10 +913,6 @@ function ChangeSimulationSpeed(value)
     $("#speed-badge").text(value);
 }
 
-SetupMazeAlgorithms();
-
-ChangeSimulationSpeed(50);
-
 $(document).ready(()=>{
     $(".dropdown-menu li").on("click", function (e){
         let dropDownChoice = $(this);
@@ -941,4 +937,8 @@ $(document).ready(()=>{
     });
 
     LoadGame();
+
+    SetupMazeAlgorithms();
+
+    ChangeSimulationSpeed(50);
 });
