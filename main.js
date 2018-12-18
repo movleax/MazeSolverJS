@@ -1,13 +1,29 @@
-var canvas = document.getElementById("myCanvas");
-var ctx = canvas.getContext("2d");
-var fileLoaded = false;
+var canvas;
+var ctx;
+var fileLoaded;
 var map;
-var BlockWidth = 16;
-var BlockHeight = 16;
-var blocks = [];
+var BlockWidth;
+var BlockHeight;
+var blocks;
 var gameLoopInterval;
-var mazeSolverAlgorithms = [];
-var simSpeed = 125;
+var mazeSolverAlgorithms;
+var simSpeed;
+var endGame;
+
+function LoadGame()
+{
+   canvas = document.getElementById("myCanvas");
+   ctx = canvas.getContext("2d");
+   fileLoaded = false;
+   map;
+   BlockWidth = 16;
+   BlockHeight = 16;
+   blocks = [];
+   gameLoopInterval;
+   mazeSolverAlgorithms = [];
+   simSpeed = 125;
+   endGame = new EndGame(ctx);
+}
 
 function readSingleFile(evt) 
 {
@@ -769,7 +785,6 @@ class EndGame
         canvas.removeEventListener("click", this.CallReloadGame)
     }
 }
-var endGame = new EndGame(ctx);
 
 function Draw() 
 {
