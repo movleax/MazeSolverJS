@@ -921,7 +921,9 @@ $(document).ready(()=>{
 
     ChangeSimulationSpeed(50);
 
-    $(".dropdown-menu li").on("click", function (e){
+    $(".dropdown-menu").on("click", "li", function (e){
+        console.log("IN");
+        console.log($(this));
         let dropDownChoice = $(this);
         ChangeMazeAlgorithm(dropDownChoice.text());
     });
