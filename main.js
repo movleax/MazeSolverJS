@@ -914,6 +914,13 @@ function ChangeSimulationSpeed(value)
 }
 
 $(document).ready(()=>{
+
+    LoadGame();
+
+    SetupMazeAlgorithms();
+
+    ChangeSimulationSpeed(50);
+
     $(".dropdown-menu li").on("click", function (e){
         let dropDownChoice = $(this);
         ChangeMazeAlgorithm(dropDownChoice.text());
@@ -935,10 +942,4 @@ $(document).ready(()=>{
             isSliderDragging = false;
         }
     });
-
-    LoadGame();
-
-    SetupMazeAlgorithms();
-
-    ChangeSimulationSpeed(50);
 });
