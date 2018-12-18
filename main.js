@@ -23,49 +23,54 @@ function LoadGame()
    mazeSolverAlgorithms = [];
    simSpeed = 125;
    endGame = new EndGame(ctx);
+
+    $.get( "https://movleax.github.io/MazeSolverJS/map.txt", ( mapData ) => {
+        map = mapData;
+        fileLoaded = true;
+    });
+
+    ParseMap();
 }
 
-function readSingleFile(evt) 
-{
-    //Retrieve the first (and only!) File from the FileList object
-    var f = evt.target.files[0]; 
-    var result;
-    if (f) {
-      var r = new FileReader();
-      r.onload = function(e) { 
-          var contents = e.target.result;
-        //console.log(r.result);
-        result = r.result;
-        map = result;
-        fileLoaded = true;
-        //console.log(map);
-      }
-      r.readAsText(f);
+// function readSingleFile(evt) 
+// {
+//     //Retrieve the first (and only!) File from the FileList object
+//     var f = evt.target.files[0]; 
+//     var result;
+//     if (f) {
+//       var r = new FileReader();
+//       r.onload = function(e) { 
+//           var contents = e.target.result;
+//         //console.log(r.result);
+//         result = r.result;
+//         map = result;
+//         fileLoaded = true;
+//         //console.log(map);
+//       }
+//       r.readAsText(f);
       
-    } else { 
-      alert("Failed to load file");
-    }
+//     } else { 
+//       alert("Failed to load file");
+//     }
     
-    checkLoad();
-}
+//     checkLoad();
+// }
   
-document.getElementById('fileinput').addEventListener('change', readSingleFile, false);
+//document.getElementById('fileinput').addEventListener('change', readSingleFile, false);
     
-function checkLoad() 
-{
-    if (!fileLoaded) 
-    {
-        console.log("waiting...");
-        setTimeout("checkLoad();", 1000);
-        return;
-    } 
-    else 
-    {
-        console.log("in...");
-        console.log(map);
-        ParseMap();
-    }
-}
+// function checkLoad() 
+// {
+//     if (!fileLoaded) 
+//     {
+//         console.log("waiting...");
+//         setTimeout("checkLoad();", 1000);
+//     } 
+//     else 
+//     {
+//         console.log(map);
+//         ParseMap();
+//     }
+// }
 
 function ReloadGame()
 {
@@ -922,8 +927,6 @@ $(document).ready(()=>{
     ChangeSimulationSpeed(50);
 
     $(".dropdown-menu").on("click", "li", function (e){
-        console.log("IN");
-        console.log($(this));
         let dropDownChoice = $(this);
         ChangeMazeAlgorithm(dropDownChoice.text());
     });
