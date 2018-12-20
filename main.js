@@ -904,7 +904,7 @@ function SetupMazeAlgorithms()
 
     $("#algorithm-span").text("Random");
 }
-
+ 
 function ChangeSimulationSpeed(value)
 {
     simSpeed = 1001 - Math.floor(Math.log(value)*21.3 + 1)*10;
